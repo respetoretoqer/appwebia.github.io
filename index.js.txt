@@ -1,0 +1,63 @@
+const apiKey = 'sk-proj-KISXLO0XeDjdTbcTMgLRT3BlbkFJmo0SQoP4uGF38POkOceO';
+const apiUrl = 'https://api.openai.com/v1/completions';
+
+document.getElementById('send-btn').addEventListener('click', () => {
+    enviarPregunta();
+});
+
+document.getElementById('user-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        enviarPregunta();
+    }
+});
+
+async function enviarPregunta() {
+    const preguntaUsuario = document.getElementById('user-input').value.trim();
+    if (preguntaUsuario === '') return;
+
+    const respuesta = await enviarPreguntaAPICGPT(preguntaUsuario);
+    mostrarMensajeUsuario(preguntaUsuario);
+    mostrarMensajeBot(respuesta);
+
+    document.getElementById('user-input').value = '';
+    scrollChatToBottom();
+}
+
+async function enviarPreguntaAPICGPT(pregunta) {
+    const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}` // Utiliza la variable apiKey aquí
+        },
+        body: JSON.stringify({
+            model: 'text-davinci-003',
+            prompt: pregunta,
+            max_tokens: 150
+        })
+    });
+    const data = await response.json();
+    return data.choices[0].text.trim();
+}
+
+
+function mostrarMensajeUsuario(mensaje) {
+    const chatBox = document.getElementById('chat-box');
+    const userMessage = document.createElement('div');
+    userMessage.textContent = mensaje;
+    userMessage.classList.add('chat-message', 'user');
+    chatBox.appendChild(userMessage);
+}
+
+function mostrarMensajeBot(mensaje) {
+    const chatBox = document.getElementById('chat-box');
+    const botMessage = document.createElement('div');
+    botMessage.textContent = mensaje;
+    botMessage.classList.add('chat-message', 'bot');
+    chatBox.appendChild(botMessage);
+}
+
+function scrollChatToBottom() {
+    const chatBox = document.getElementById('chat-box');
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
